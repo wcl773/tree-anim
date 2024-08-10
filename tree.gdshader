@@ -1,0 +1,37 @@
+shader_type spatial;
+render_mode depth_draw_always, cull_disabled, world_vertex_coords;
+
+uniform sampler2D texture_albedo : hint_default_white;
+uniform sampler2D normal_albedo : hint_normal;
+uniform vec4 transmission;
+
+uniform float sway_speed = 1.0;
+uniform float sway_strength = 0.05;
+uniform float sway_phase_len = 8.0;
+
+void vertex() {
+    float strength = COLOR.r * sway_strength;
+    VERTEX.x += sin(VERTEX.x * sway_phase_len * 1.123 + TIME * sway_speed) * strength;
+    VERTEX.y += sin(VERTEX.y * sway_phase_len + TIME * sway_speed * 1.12412) * strength;
+    VERTEX.z += sin(VERTEX.z * sway_phase_len * 0.9123 + TIME * sway_speed * 1.3123) * strength;
+}
+
+void fragment() {
+    vec4 albedo_tex = texture(texture_albedo, UV);
+    vec4 normal_tex = texture(normal_albedo, UV);
+
+    // Convert the normal map texture to a normal vector
+    vec3 normal = normalize(normal_tex.rgb * 2.0 - 1.0);
+
+    // Set the albedo color and alpha
+    ALBEDO = albedo_tex.rgb;
+    ALPHA = albedo_tex.a;
+    METALLIC = 0.0;
+    ROUGHNESS = 1.0;
+
+    // Set the normal (this will be used in lighting calculations)
+    NORMAL = normal;
+
+    // Transmission (if applicable)
+
+}
